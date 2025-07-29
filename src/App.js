@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+const API_BASE = "https://dsa-tracker-backend.onrender.com";
+
 function App() {
   const [problems, setProblems] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -18,7 +20,7 @@ function App() {
 
   // Fetch problems + stats on mount
   useEffect(() => {
-    fetch('/api/problems')
+    fetch(`${API_BASE}/api/problems`)
       .then(res => res.json())
       .then(data => {
         setProblems(data);
@@ -28,7 +30,7 @@ function App() {
   }, []);
 
   const fetchStats = () => {
-    fetch('/api/problems/stats')
+    fetch(`${API_BASE}/api/problems/stats`)
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(err => console.error('Error fetching stats:', err));
@@ -44,7 +46,7 @@ function App() {
 
     if (editingId) {
       // Update existing problem
-      const res = await fetch(`/api/problems/${editingId}`, {
+      const res = await fetch(`${API_BASE}/api/problems/${editingId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, tags: tagsArray })
@@ -54,7 +56,7 @@ function App() {
       setEditingId(null);
     } else {
       // Add new problem
-      const res = await fetch('/api/problems', {
+      const res = await fetch(`${API_BASE}/api/problems`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, tags: tagsArray })
@@ -68,7 +70,7 @@ function App() {
   };
 
   const handleDelete = async (id) => {
-    await fetch(`/api/problems/${id}`, {
+    await fetch(`${API_BASE}/api/problems/${id}`, {
       method: 'DELETE'
     });
     setProblems(problems.filter(p => p._id !== id));
@@ -154,6 +156,3 @@ function App() {
 }
 
 export default App;
-
-
-
