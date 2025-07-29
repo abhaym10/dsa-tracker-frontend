@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
 function App() {
-  const API_BASE = "https://dsa-tracker-backend.onrender.com/api/problems";
-
   const [problems, setProblems] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [stats, setStats] = useState(null);
@@ -18,9 +16,11 @@ function App() {
   const [difficultyFilter, setDifficultyFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
+  const BASE_URL = "https://dsa-tracker-backend.onrender.com/api/problems";
+
   // Fetch problems + stats on mount
   useEffect(() => {
-    fetch(API_BASE)
+    fetch(BASE_URL)
       .then(res => res.json())
       .then(data => {
         setProblems(data);
@@ -30,7 +30,7 @@ function App() {
   }, []);
 
   const fetchStats = () => {
-    fetch(API_BASE + "/stats")
+    fetch(BASE_URL + "/stats")
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(err => console.error('Error fetching stats:', err));
@@ -45,8 +45,7 @@ function App() {
     const tagsArray = formData.tags.split(',').map(tag => tag.trim());
 
     if (editingId) {
-      // Update existing problem
-      const res = await fetch(`${API_BASE}/${editingId}`, {
+      const res = await fetch(`${BASE_URL}/${editingId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, tags: tagsArray })
@@ -55,8 +54,7 @@ function App() {
       setProblems(problems.map(p => (p._id === updated._id ? updated : p)));
       setEditingId(null);
     } else {
-      // Add new problem
-      const res = await fetch(API_BASE, {
+      const res = await fetch(BASE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, tags: tagsArray })
@@ -70,7 +68,7 @@ function App() {
   };
 
   const handleDelete = async (id) => {
-    await fetch(`${API_BASE}/${id}`, {
+    await fetch(`${BASE_URL}/${id}`, {
       method: 'DELETE'
     });
     setProblems(problems.filter(p => p._id !== id));
