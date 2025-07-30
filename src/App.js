@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+const BASE_URL = "https://dsa-tracker-backend.onrender.com";
+
 function App() {
   const [problems, setProblems] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -16,26 +18,27 @@ function App() {
   const [difficultyFilter, setDifficultyFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  // ✅ Use your deployed backend URL here
-  const API_BASE = "https://dsa-tracker-backend.onrender.com";
-
-  // Fetch problems + stats on mount
-  useEffect(() => {
-    fetch(`${API_BASE}/api/problems`)
+  // Fetch all problems
+  const fetchProblems = () => {
+    fetch(`${BASE_URL}/api/problems`)
       .then(res => res.json())
-      .then(data => {
-        setProblems(data);
-        fetchStats();
-      })
+      .then(data => setProblems(data || []))
       .catch(err => console.error('Error fetching problems:', err));
-  }, []);
+  };
 
+  // Fetch stats
   const fetchStats = () => {
-    fetch(`${API_BASE}/api/problems/stats`)
+    fetch(`${BASE_URL}/api/problems/stats`)
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(err => console.error('Error fetching stats:', err));
   };
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchProblems();
+    fetchStats();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -46,8 +49,8 @@ function App() {
     const tagsArray = formData.tags.split(',').map(tag => tag.trim());
 
     if (editingId) {
-      // Update problem
-      const res = await fetch(`${API_BASE}/api/problems/${editingId}`, {
+      // Update existing problem
+      const res = await fetch(`${BASE_URL}/api/problems/${editingId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, tags: tagsArray })
@@ -57,7 +60,7 @@ function App() {
       setEditingId(null);
     } else {
       // Add new problem
-      const res = await fetch(`${API_BASE}/api/problems`, {
+      const res = await fetch(`${BASE_URL}/api/problems`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, tags: tagsArray })
@@ -71,7 +74,7 @@ function App() {
   };
 
   const handleDelete = async (id) => {
-    await fetch(`${API_BASE}/api/problems/${id}`, {
+    await fetch(`${BASE_URL}/api/problems/${id}`, {
       method: 'DELETE'
     });
     setProblems(problems.filter(p => p._id !== id));
@@ -107,7 +110,7 @@ function App() {
           <p><strong>Unsolved:</strong> {stats.unsolved}</p>
           <p><strong>By Difficulty:</strong></p>
           <ul>
-            {Object.entries(stats.difficultyCount).map(([lvl, cnt]) => (
+            {Object.entries(stats.difficultyCount || {}).map(([lvl, cnt]) => (
               <li key={lvl}>{lvl.toUpperCase()}: {cnt}</li>
             ))}
           </ul>
