@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const BACKEND_URL = "https://dsa-tracker-backend-production-<your-id>.up.railway.app"; 
-// 🔹 Replace <your-id> with your Railway backend URL
+const API_URL = "https://dsa-tracker-backend-production-a8d4.up.railway.app/api/problems";
 
 function App() {
   const [problems, setProblems] = useState([]);
@@ -21,7 +20,7 @@ function App() {
 
   // Fetch problems + stats on mount
   useEffect(() => {
-    fetch(`${BACKEND_URL}/api/problems`)
+    fetch(API_URL)
       .then(res => res.json())
       .then(data => {
         setProblems(data);
@@ -31,7 +30,7 @@ function App() {
   }, []);
 
   const fetchStats = () => {
-    fetch(`${BACKEND_URL}/api/stats`)
+    fetch(`${API_URL}/stats`)
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(err => console.error('Error fetching stats:', err));
@@ -47,7 +46,7 @@ function App() {
 
     if (editingId) {
       // Update existing problem
-      const res = await fetch(`${BACKEND_URL}/api/problems/${editingId}`, {
+      const res = await fetch(`${API_URL}/${editingId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, tags: tagsArray })
@@ -57,7 +56,7 @@ function App() {
       setEditingId(null);
     } else {
       // Add new problem
-      const res = await fetch(`${BACKEND_URL}/api/problems`, {
+      const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, tags: tagsArray })
@@ -71,7 +70,7 @@ function App() {
   };
 
   const handleDelete = async (id) => {
-    await fetch(`${BACKEND_URL}/api/problems/${id}`, {
+    await fetch(`${API_URL}/${id}`, {
       method: 'DELETE'
     });
     setProblems(problems.filter(p => p._id !== id));
